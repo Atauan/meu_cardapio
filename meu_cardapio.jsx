@@ -457,13 +457,14 @@ export default function App() {
       </div>
 
       {/* ÁREA DE PRÉ-VISUALIZAÇÃO / IMPRESSÃO */}
-      <div className="flex-1 overflow-y-auto bg-gray-200 p-4 md:p-8 print:p-0 print:bg-white flex justify-center">
+      <div className="flex-1 overflow-y-auto bg-gray-200 p-4 md:p-8 print:p-0 print:bg-white print:overflow-visible flex justify-center">
 
-        {/* Container que simula uma folha A4 */}
+        {/* Container que simula folhas A4 — conteúdo flui para novas páginas automaticamente */}
         <div className={`
-          w-full max-w-3xl min-h-[1056px] shadow-2xl print:shadow-none 
+          menu-print-area
+          w-full max-w-3xl shadow-2xl print:shadow-none
           transition-all duration-300 relative bg-white
-          print:w-full print:max-w-none print:min-h-0 print:m-0
+          print:w-full print:max-w-none print:m-0
           ${themeStyles.wrapper}
         `}>
 
@@ -480,7 +481,7 @@ export default function App() {
           {/* Renderização das Categorias e Itens */}
           <div className="space-y-10">
             {menuData.categories.map((category) => (
-              <div key={`preview-${category.id}`}>
+              <div key={`preview-${category.id}`} className="menu-category">
                 {/* Nome da Categoria */}
                 <h2 className={themeStyles.category}>
                   {category.name}
@@ -489,12 +490,16 @@ export default function App() {
                 {/* Itens da Categoria */}
                 <div className={`space-y-6 ${menuData.theme === 'modern' ? 'grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 space-y-0 print:grid-cols-2' : ''}`}>
                   {category.items.map((item) => (
-                    <div key={`preview-${item.id}`} className={menuData.theme === 'modern' ? '' : 'flex flex-col'}>
+                    <div key={`preview-${item.id}`} className={`menu-item ${menuData.theme === 'modern' ? '' : 'flex flex-col'}`}>
 
                       <div className="flex justify-between items-end w-full">
                         <span className={themeStyles.itemName}>{item.name}</span>
                         <div className={themeStyles.priceDots}></div>
-                        <span className={themeStyles.itemPrice}>R$ {item.price}</span>
+                        {item.price ? (
+                          <span className={themeStyles.itemPrice}>R$ {item.price}</span>
+                        ) : (
+                          <span className={`${themeStyles.itemPrice} whitespace-nowrap`}>R$ <span className="inline-block w-16 border-b-2 border-dotted border-gray-400 print:border-gray-600">&nbsp;</span></span>
+                        )}
                       </div>
 
                       {item.description && (
@@ -509,7 +514,7 @@ export default function App() {
             ))}
           </div>
 
-          {/* Rodapé decorativo opcional para pré-visualização */}
+          {/* Rodapé decorativo */}
           <div className="mt-16 pt-8 border-t border-gray-200 text-center print:border-gray-300">
             <p className="text-xs text-gray-400">
               Obrigado pela preferência!
@@ -519,12 +524,45 @@ export default function App() {
         </div>
       </div>
 
-      {/* Estilos globais para impressão */}
+      {/* Estilos globais para impressão e paginação A4 */}
       <style dangerouslySetInnerHTML={{
         __html: `
         @media print {
-          body, html { margin: 0; padding: 0; background: white; }
-          @page { margin: 1cm; }
+          body, html {
+            margin: 0;
+            padding: 0;
+            background: white;
+          }
+          @page {
+            size: A4;
+            margin: 1.5cm;
+          }
+
+          /* O container flui naturalmente pelas páginas */
+          .menu-print-area {
+            min-height: auto !important;
+            height: auto !important;
+            overflow: visible !important;
+            box-shadow: none !important;
+          }
+
+          /* Categorias evitam quebrar no meio — se não couber, vão pra próxima página */
+          .menu-category {
+            break-inside: avoid;
+            page-break-inside: avoid;
+          }
+
+          /* Itens individuais nunca quebram no meio de uma página */
+          .menu-item {
+            break-inside: avoid;
+            page-break-inside: avoid;
+          }
+
+          /* Títulos de categoria ficam com o conteúdo — nunca ficam sozinhos no final da página */
+          .menu-category h2 {
+            break-after: avoid;
+            page-break-after: avoid;
+          }
         }
       `}} />
     </div>
