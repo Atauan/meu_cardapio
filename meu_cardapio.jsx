@@ -20,7 +20,7 @@ const defaultData = {
   restaurantName: 'A Cantina do Chef',
   subtitle: 'Sabores autênticos desde 1998',
   theme: 'classic',
-  fontSize: 'medium', // small, medium, large
+  fontSize: 5, // 1-10 escala numérica
   categories: [
     {
       id: 'cat-1',
@@ -195,53 +195,80 @@ export default function App() {
     setBulkText('');
   };
 
-  // Mapa de tamanhos de fonte
-  const fontSizeMap = {
-    small:  { title: 'text-3xl', subtitle: 'text-xs', category: 'text-lg', item: 'text-sm', desc: 'text-xs', price: 'text-sm', spacing: 'space-y-3', catSpacing: 'space-y-6', pad: 'p-6' },
-    medium: { title: 'text-5xl', subtitle: 'text-md', category: 'text-2xl', item: 'text-lg', desc: 'text-sm', price: 'text-lg', spacing: 'space-y-6', catSpacing: 'space-y-10', pad: 'p-10' },
-    large:  { title: 'text-6xl', subtitle: 'text-lg', category: 'text-3xl', item: 'text-xl', desc: 'text-base', price: 'text-xl', spacing: 'space-y-8', catSpacing: 'space-y-12', pad: 'p-12' },
+  // Tamanhos de fonte computados a partir do nível 1-10
+  const level = Number(menuData.fontSize) || 5;
+  const sz = {
+    title:    Math.round(14 + level * 5),   // 19px → 64px
+    subtitle: Math.round(8 + level * 1.5),  // 9.5px → 23px
+    category: Math.round(10 + level * 3),   // 13px → 40px
+    item:     Math.round(8 + level * 2),    // 10px → 28px
+    desc:     Math.round(6 + level * 1.4),  // 7.4px → 20px
+    price:    Math.round(8 + level * 2),    // 10px → 28px
+    pad:      Math.round(12 + level * 5),   // 17px → 62px
+    itemGap:  Math.round(4 + level * 3),    // 7px → 34px
+    catGap:   Math.round(10 + level * 6),   // 16px → 70px
   };
 
-  const fs = fontSizeMap[menuData.fontSize] || fontSizeMap.medium;
-
-  // Estilos baseados no tema escolhido + tamanho de fonte
+  // Estilos baseados no tema + tamanho de fonte numérico
   const getThemeStyles = () => {
+    const basePad = { padding: `${sz.pad}px` };
     switch (menuData.theme) {
       case 'modern':
         return {
-          wrapper: `bg-white text-gray-800 font-sans ${fs.pad}`,
+          wrapper: basePad,
+          wrapperClass: 'bg-white text-gray-800 font-sans',
           header: 'text-center mb-12',
-          title: `${fs.title} font-black uppercase tracking-widest text-gray-900 mb-2`,
-          subtitle: `${fs.subtitle} font-medium uppercase tracking-widest text-gray-400`,
-          category: `${fs.category} font-bold border-b-2 border-gray-900 pb-2 mb-6 uppercase tracking-wide`,
-          itemName: `${fs.item} font-bold text-gray-900`,
-          itemDesc: `${fs.desc} text-gray-500 mt-1`,
-          itemPrice: `${fs.price} font-bold text-gray-900`,
+          titleStyle: { fontSize: sz.title + 'px' },
+          titleClass: 'font-black uppercase tracking-widest text-gray-900 mb-2',
+          subtitleStyle: { fontSize: sz.subtitle + 'px' },
+          subtitleClass: 'font-medium uppercase tracking-widest text-gray-400',
+          categoryStyle: { fontSize: sz.category + 'px' },
+          categoryClass: 'font-bold border-b-2 border-gray-900 pb-2 mb-6 uppercase tracking-wide',
+          itemNameStyle: { fontSize: sz.item + 'px' },
+          itemNameClass: 'font-bold text-gray-900',
+          itemDescStyle: { fontSize: sz.desc + 'px' },
+          itemDescClass: 'text-gray-500 mt-1',
+          itemPriceStyle: { fontSize: sz.price + 'px' },
+          itemPriceClass: 'font-bold text-gray-900',
           priceDots: 'hidden'
         };
       case 'rustic':
         return {
-          wrapper: `bg-[#faf6f0] text-[#5c4033] font-serif ${fs.pad} border-[10px] border-[#8b5a2b]/20`,
+          wrapper: basePad,
+          wrapperClass: 'bg-[#faf6f0] text-[#5c4033] font-serif border-[10px] border-[#8b5a2b]/20',
           header: 'text-center mb-10 border-b-2 border-[#8b5a2b]/30 pb-6',
-          title: `${fs.title} font-bold tracking-tight text-[#4a3020] mb-3`,
-          subtitle: `${fs.subtitle} italic text-[#8b5a2b]`,
-          category: `${fs.category} font-bold text-[#4a3020] mb-6 text-center mt-8`,
-          itemName: `${fs.item} font-bold text-[#5c4033]`,
-          itemDesc: `${fs.desc} italic text-[#705446] mt-1`,
-          itemPrice: `${fs.price} font-bold text-[#4a3020]`,
+          titleStyle: { fontSize: sz.title + 'px' },
+          titleClass: 'font-bold tracking-tight text-[#4a3020] mb-3',
+          subtitleStyle: { fontSize: sz.subtitle + 'px' },
+          subtitleClass: 'italic text-[#8b5a2b]',
+          categoryStyle: { fontSize: sz.category + 'px' },
+          categoryClass: 'font-bold text-[#4a3020] mb-6 text-center mt-8',
+          itemNameStyle: { fontSize: sz.item + 'px' },
+          itemNameClass: 'font-bold text-[#5c4033]',
+          itemDescStyle: { fontSize: sz.desc + 'px' },
+          itemDescClass: 'italic text-[#705446] mt-1',
+          itemPriceStyle: { fontSize: sz.price + 'px' },
+          itemPriceClass: 'font-bold text-[#4a3020]',
           priceDots: 'flex-grow border-b-2 border-dotted border-[#8b5a2b]/40 mx-3 relative top-[-6px]'
         };
       case 'classic':
       default:
         return {
-          wrapper: `bg-white text-gray-900 font-serif ${fs.pad}`,
+          wrapper: basePad,
+          wrapperClass: 'bg-white text-gray-900 font-serif',
           header: 'text-center mb-12',
-          title: `${fs.title} font-normal mb-3`,
-          subtitle: `${fs.subtitle} text-gray-600 italic`,
-          category: `${fs.category} font-semibold mb-6 mt-8 text-center uppercase tracking-widest`,
-          itemName: `${fs.item} font-semibold text-gray-900`,
-          itemDesc: `${fs.desc} text-gray-600 mt-1`,
-          itemPrice: `${fs.price} font-semibold text-gray-900`,
+          titleStyle: { fontSize: sz.title + 'px' },
+          titleClass: 'font-normal mb-3',
+          subtitleStyle: { fontSize: sz.subtitle + 'px' },
+          subtitleClass: 'text-gray-600 italic',
+          categoryStyle: { fontSize: sz.category + 'px' },
+          categoryClass: 'font-semibold mb-6 mt-8 text-center uppercase tracking-widest',
+          itemNameStyle: { fontSize: sz.item + 'px' },
+          itemNameClass: 'font-semibold text-gray-900',
+          itemDescStyle: { fontSize: sz.desc + 'px' },
+          itemDescClass: 'text-gray-600 mt-1',
+          itemPriceStyle: { fontSize: sz.price + 'px' },
+          itemPriceClass: 'font-semibold text-gray-900',
           priceDots: 'flex-grow border-b border-dashed border-gray-300 mx-3 relative top-[-6px]'
         };
     }
@@ -322,16 +349,21 @@ export default function App() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1">Tamanho da Fonte</label>
-                <select
-                  value={menuData.fontSize || 'medium'}
-                  onChange={(e) => updateInfo('fontSize', e.target.value)}
-                  className="w-full p-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white"
-                >
-                  <option value="small">Pequeno — mais itens por página</option>
-                  <option value="medium">Médio — padrão</option>
-                  <option value="large">Grande — destaque</option>
-                </select>
+                <label className="block text-xs font-semibold text-gray-600 mb-1">Tamanho da Fonte: <strong className="text-blue-600">{level}</strong></label>
+                <input
+                  type="range"
+                  min="1"
+                  max="10"
+                  step="1"
+                  value={level}
+                  onChange={(e) => updateInfo('fontSize', Number(e.target.value))}
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                />
+                <div className="flex justify-between text-[10px] text-gray-400 mt-1">
+                  <span>1 Compacto</span>
+                  <span>5</span>
+                  <span>10 Grande</span>
+                </div>
               </div>
             </div>
           </section>
@@ -496,26 +528,29 @@ export default function App() {
         <div className="flex flex-col items-center gap-8 print:gap-0">
 
           {/* Página principal com cabeçalho */}
-          <div className={`
-            menu-print-area
-            w-full max-w-3xl min-h-[1056px] shadow-2xl print:shadow-none
-            transition-all duration-300 bg-white
-            print:w-full print:max-w-none print:m-0 print:min-h-0
-            ${themeStyles.wrapper}
-          `}>
+          <div
+            className={`
+              menu-print-area
+              w-full max-w-3xl min-h-[1056px] shadow-2xl print:shadow-none
+              transition-all duration-300 bg-white
+              print:w-full print:max-w-none print:m-0 print:min-h-0
+              ${themeStyles.wrapperClass}
+            `}
+            style={themeStyles.wrapper}
+          >
 
             {/* Cabeçalho do Restaurante */}
             <div className={themeStyles.header}>
-              <h1 className={themeStyles.title}>
+              <h1 className={themeStyles.titleClass} style={themeStyles.titleStyle}>
                 {menuData.restaurantName || 'Nome do Restaurante'}
               </h1>
               {menuData.subtitle && (
-                <p className={themeStyles.subtitle}>{menuData.subtitle}</p>
+                <p className={themeStyles.subtitleClass} style={themeStyles.subtitleStyle}>{menuData.subtitle}</p>
               )}
             </div>
 
             {/* Categorias e Itens */}
-            <div className={fs.catSpacing}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: sz.catGap + 'px' }}>
               {menuData.categories.map((category, catIndex) => (
                 <div
                   key={`preview-${category.id}`}
@@ -531,27 +566,30 @@ export default function App() {
                   )}
 
                   {/* Nome da Categoria */}
-                  <h2 className={themeStyles.category}>
+                  <h2 className={themeStyles.categoryClass} style={themeStyles.categoryStyle}>
                     {category.name}
                   </h2>
 
                   {/* Itens da Categoria */}
-                  <div className={`${fs.spacing} ${menuData.theme === 'modern' ? 'grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 space-y-0 print:grid-cols-2' : ''}`}>
+                  <div
+                    className={menuData.theme === 'modern' ? 'grid grid-cols-1 md:grid-cols-2 gap-x-8 print:grid-cols-2' : ''}
+                    style={{ display: menuData.theme === 'modern' ? undefined : 'flex', flexDirection: 'column', gap: sz.itemGap + 'px' }}
+                  >
                     {category.items.map((item) => (
                       <div key={`preview-${item.id}`} className={`menu-item ${menuData.theme === 'modern' ? '' : 'flex flex-col'}`}>
 
                         <div className="flex justify-between items-end w-full">
-                          <span className={themeStyles.itemName}>{item.name}</span>
+                          <span className={themeStyles.itemNameClass} style={themeStyles.itemNameStyle}>{item.name}</span>
                           <div className={themeStyles.priceDots}></div>
                           {item.price ? (
-                            <span className={themeStyles.itemPrice}>R$ {item.price}</span>
+                            <span className={themeStyles.itemPriceClass} style={themeStyles.itemPriceStyle}>R$ {item.price}</span>
                           ) : (
-                            <span className={`${themeStyles.itemPrice} whitespace-nowrap`}>R$ <span className="inline-block w-16 border-b-2 border-dotted border-gray-400 print:border-gray-600">&nbsp;</span></span>
+                            <span className={`${themeStyles.itemPriceClass} whitespace-nowrap`} style={themeStyles.itemPriceStyle}>R$ <span className="inline-block w-16 border-b-2 border-dotted border-gray-400 print:border-gray-600">&nbsp;</span></span>
                           )}
                         </div>
 
                         {item.description && (
-                          <p className={`w-11/12 ${themeStyles.itemDesc}`}>
+                          <p className={`w-11/12 ${themeStyles.itemDescClass}`} style={themeStyles.itemDescStyle}>
                             {item.description}
                           </p>
                         )}
@@ -577,31 +615,51 @@ export default function App() {
       <style dangerouslySetInnerHTML={{
         __html: `
         @media print {
+          /* Reset geral — tudo visível, sem clipping */
+          *, *::before, *::after {
+            overflow: visible !important;
+          }
+
           body, html {
             margin: 0;
             padding: 0;
             background: white;
+            height: auto !important;
+            overflow: visible !important;
           }
+
+          #root, #root > div {
+            height: auto !important;
+            overflow: visible !important;
+            display: block !important;
+          }
+
           @page {
             size: A4;
             margin: 1.5cm;
           }
 
-          /* O container flui naturalmente pelas páginas */
+          /* O container do cardápio flui pelas páginas */
           .menu-print-area {
+            width: 100% !important;
+            max-width: none !important;
             min-height: auto !important;
             height: auto !important;
             overflow: visible !important;
             box-shadow: none !important;
+            margin: 0 !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+            position: static !important;
           }
 
-          /* Itens individuais nunca quebram no meio de uma página */
+          /* Itens individuais nunca quebram no meio */
           .menu-item {
             break-inside: avoid;
             page-break-inside: avoid;
           }
 
-          /* Títulos de categoria ficam com o conteúdo — nunca ficam sozinhos no final da página */
+          /* Títulos de categoria ficam com o conteúdo */
           .menu-category h2 {
             break-after: avoid;
             page-break-after: avoid;
