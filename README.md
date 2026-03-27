@@ -2,6 +2,8 @@
 
 Editor visual de cardápios para restaurantes, feito com **React**. Crie, personalize e exporte cardápios profissionais direto do navegador — sem backend necessário.
 
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/AtauanLima/meu_cardapio)
+
 ---
 
 ## ✨ Funcionalidades
@@ -17,62 +19,68 @@ Editor visual de cardápios para restaurantes, feito com **React**. Crie, person
 
 ---
 
-## 🚀 Como Rodar
+## 🚀 Deploy na Vercel (Recomendado)
+
+1. Faça push deste repositório no GitHub
+2. Acesse [vercel.com/new](https://vercel.com/new)
+3. Importe o repositório `meucardapio`
+4. A Vercel detecta automaticamente o Vite — clique em **Deploy**
+5. Pronto! Seu cardápio estará online em segundos 🎉
+
+> Não precisa configurar nada — o `package.json` já tem os scripts `build` e `dev` que a Vercel usa automaticamente.
+
+---
+
+## 💻 Rodando Localmente
 
 ### Pré-requisitos
 
 - [Node.js](https://nodejs.org/) (v18+)
-- npm (vem com o Node.js)
 
-### 1. Clone o repositório
-
-```bash
-git clone https://github.com/seu-usuario/meucardapio.git
-cd meucardapio
-```
-
-### 2. Crie o projeto React (primeira vez)
-
-O arquivo `meu_cardapio.jsx` é um componente React completo. Para rodá-lo, inicialize um projeto Vite:
+### Passos
 
 ```bash
-npx -y create-vite@latest ./ -- --template react
-```
+# 1. Clone o repositório
+git clone https://github.com/AtauanLima/meu_cardapio.git
+cd meu_cardapio
 
-> Se perguntar se deseja sobrescrever, confirme. O arquivo `meu_cardapio.jsx` será mantido.
-
-### 3. Instale as dependências
-
-```bash
+# 2. Instale as dependências
 npm install
-npm install lucide-react
-```
 
-### 4. Configure o ponto de entrada
-
-Substitua o conteúdo de `src/App.jsx` para importar o componente:
-
-```jsx
-export { default } from '../meu_cardapio.jsx';
-```
-
-Ou simplesmente copie o conteúdo de `meu_cardapio.jsx` para `src/App.jsx`.
-
-### 5. Rode o projeto
-
-```bash
+# 3. Rode o servidor de desenvolvimento
 npm run dev
 ```
 
 Acesse **http://localhost:5173** no navegador. 🎉
 
+### Comandos disponíveis
+
+| Comando | Descrição |
+|---|---|
+| `npm run dev` | Inicia o servidor de desenvolvimento |
+| `npm run build` | Gera o build de produção em `dist/` |
+| `npm run preview` | Pré-visualiza o build de produção |
+
 ---
 
 ## 📖 Como Funciona
 
-### Estrutura do Componente
+### Estrutura do Projeto
 
-O app é um **único componente React** (`App`) dividido visualmente em duas áreas:
+```
+meucardapio/
+├── index.html              ← Entrada HTML (Vite)
+├── meu_cardapio.jsx        ← Componente principal do editor
+├── package.json            ← Dependências e scripts
+├── vite.config.js          ← Configuração do Vite
+├── tailwind.config.js      ← Configuração do Tailwind CSS
+├── postcss.config.js       ← PostCSS (processamento do Tailwind)
+└── src/
+    ├── main.jsx            ← Ponto de entrada React
+    └── index.css           ← Importação do Tailwind
+```
+
+### Layout
 
 ```
 ┌──────────────────┬─────────────────────────────────┐
@@ -92,20 +100,13 @@ O app é um **único componente React** (`App`) dividido visualmente em duas ár
 └──────────────────┴─────────────────────────────────┘
 ```
 
-### Fluxo de Dados
-
-1. Todo o estado do cardápio fica em um único `useState` (`menuData`)
-2. O editor modifica o estado via funções (`updateInfo`, `addCategory`, `addItem`, etc.)
-3. A pré-visualização **reage automaticamente** a qualquer mudança no estado
-4. Ao clicar em "Exportar", o `window.print()` é chamado — o CSS `@media print` oculta o editor e formata a folha
-
 ### Temas Disponíveis
 
 | Tema | Fonte | Estilo |
 |---|---|---|
 | **Clássico** | Serif | Elegante, linhas pontilhadas entre nome e preço |
-| **Moderno** | Sans-serif | Minimalista, layout em grid de 2 colunas, sem pontilhado |
-| **Rústico** | Serif | Cores quentes marrons, borda decorativa, visual aconchegante |
+| **Moderno** | Sans-serif | Minimalista, layout em grid de 2 colunas |
+| **Rústico** | Serif | Cores quentes marrons, borda decorativa |
 
 ### Dados de Exemplo
 
@@ -119,9 +120,10 @@ O app já vem com dados de demonstração (editáveis):
 
 ## 🛠️ Tecnologias
 
-- **React** — Componentes e gerenciamento de estado
-- **Tailwind CSS** — Estilização via classes utilitárias
-- **Lucide React** — Ícones (Plus, Trash2, Printer, Settings, etc.)
+- **React 18** — Componentes e gerenciamento de estado
+- **Vite** — Build tool ultra-rápido
+- **Tailwind CSS 3** — Estilização via classes utilitárias
+- **Lucide React** — Ícones vetoriais
 
 ---
 
