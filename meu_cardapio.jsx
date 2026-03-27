@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Plus,
   Trash2,
@@ -8,44 +8,68 @@ import {
   ChevronDown,
   ChevronUp,
   Type,
-  AlignLeft
+  AlignLeft,
+  ClipboardPaste,
+  Save
 } from 'lucide-react';
 
+const STORAGE_KEY = 'meuCardapioData';
+
+const defaultData = {
+  restaurantName: 'A Cantina do Chef',
+  subtitle: 'Sabores autênticos desde 1998',
+  theme: 'classic',
+  categories: [
+    {
+      id: 'cat-1',
+      name: 'Entradas',
+      expanded: true,
+      items: [
+        { id: 'item-1', name: 'Bruschetta de Tomate', description: 'Pão rústico tostado com tomate fresco, alho e manjericão.', price: '5.50' },
+        { id: 'item-2', name: 'Tábua de Queijos', description: 'Seleção de queijos regionais acompanhados de compota e nozes.', price: '12.00' }
+      ]
+    },
+    {
+      id: 'cat-2',
+      name: 'Pratos Principais',
+      expanded: true,
+      items: [
+        { id: 'item-3', name: 'Bacalhau à Brás', description: 'Lascas de bacalhau envolvidas em batata palha, cebola e ovos.', price: '14.50' },
+        { id: 'item-4', name: 'Bife da Casa', description: 'Bife do lombo com molho especial de pimentas, servido com batata frita.', price: '18.00' }
+      ]
+    },
+    {
+      id: 'cat-3',
+      name: 'Sobremesas',
+      expanded: false,
+      items: [
+        { id: 'item-5', name: 'Mousse de Chocolate', description: 'Mousse caseira com 70% cacau.', price: '4.00' }
+      ]
+    }
+  ]
+};
+
 export default function App() {
-  // Estado inicial com dados de exemplo para demonstração
-  const [menuData, setMenuData] = useState({
-    restaurantName: 'A Cantina do Chef',
-    subtitle: 'Sabores autênticos desde 1998',
-    theme: 'classic', // classic, modern, rustic
-    categories: [
-      {
-        id: 'cat-1',
-        name: 'Entradas',
-        expanded: true,
-        items: [
-          { id: 'item-1', name: 'Bruschetta de Tomate', description: 'Pão rústico tostado com tomate fresco, alho e manjericão.', price: '5.50' },
-          { id: 'item-2', name: 'Tábua de Queijos', description: 'Seleção de queijos regionais acompanhados de compota e nozes.', price: '12.00' }
-        ]
-      },
-      {
-        id: 'cat-2',
-        name: 'Pratos Principais',
-        expanded: true,
-        items: [
-          { id: 'item-3', name: 'Bacalhau à Brás', description: 'Lascas de bacalhau envolvidas em batata palha, cebola e ovos.', price: '14.50' },
-          { id: 'item-4', name: 'Bife da Casa', description: 'Bife do lombo com molho especial de pimentas, servido com batata frita.', price: '18.00' }
-        ]
-      },
-      {
-        id: 'cat-3',
-        name: 'Sobremesas',
-        expanded: false,
-        items: [
-          { id: 'item-5', name: 'Mousse de Chocolate', description: 'Mousse caseira com 70% cacau.', price: '4.00' }
-        ]
-      }
-    ]
+  // Carrega do localStorage ou usa dados padrão
+  const [menuData, setMenuData] = useState(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      return saved ? JSON.parse(saved) : defaultData;
+    } catch {
+      return defaultData;
+    }
   });
+
+  // Estado para importação em massa
+  const [bulkText, setBulkText] = useState('');
+  const [bulkTargetCategory, setBulkTargetCategory] = useState('');
+
+  // Salva no localStorage sempre que menuData muda
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(menuData));
+    } catch { /* storage full */ }
+  }, [menuData]);
 
   // Funções de manipulação do estado principal
   const updateInfo = (field, value) => {
@@ -126,6 +150,43 @@ export default function App() {
 
   const handlePrint = () => {
     window.print();
+  };
+
+  // Importação em massa — parseia linhas "Nome Preço" ou só "Nome"
+  const handleBulkImport = () => {
+    if (!bulkText.trim() || !bulkTargetCategory) return;
+
+    const lines = bulkText.split('\n').filter(line => line.trim());
+    const newItems = lines.map((line) => {
+      const trimmed = line.trim();
+      // Tenta extrair preço do final da linha (ex: "Água 3.00" ou "Heineken 12.00")
+      const match = trimmed.match(/^(.+?)\s+(\d+(?:[.,]\d{1,2})?)\s*$/);
+      if (match) {
+        return {
+          id: `item-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+          name: match[1].trim(),
+          description: '',
+          price: match[2].replace(',', '.')
+        };
+      }
+      // Sem preço — cria item sem valor
+      return {
+        id: `item-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        name: trimmed,
+        description: '',
+        price: ''
+      };
+    });
+
+    const updatedCategories = menuData.categories.map(cat => {
+      if (cat.id === bulkTargetCategory) {
+        return { ...cat, items: [...cat.items, ...newItems], expanded: true };
+      }
+      return cat;
+    });
+
+    setMenuData({ ...menuData, categories: updatedCategories });
+    setBulkText('');
   };
 
   // Estilos baseados no tema escolhido
@@ -245,6 +306,45 @@ export default function App() {
                 </select>
               </div>
             </div>
+          </section>
+
+          {/* Importação Rápida em Massa */}
+          <section className="bg-blue-50 p-4 rounded-xl border border-blue-100">
+            <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wider mb-4 flex items-center gap-2">
+              <ClipboardPaste className="w-4 h-4 text-blue-500" />
+              Importação Rápida
+            </h2>
+            <p className="text-xs text-gray-500 mb-3">Cole uma lista de itens, um por linha. Formato: <strong>Nome do Produto Preço</strong><br/>Se não tiver preço, só coloque o nome.</p>
+
+            <div className="mb-3">
+              <label className="block text-xs font-semibold text-gray-600 mb-1">Categoria de destino</label>
+              <select
+                value={bulkTargetCategory}
+                onChange={(e) => setBulkTargetCategory(e.target.value)}
+                className="w-full p-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white"
+              >
+                <option value="">Selecione uma categoria...</option>
+                {menuData.categories.map(cat => (
+                  <option key={cat.id} value={cat.id}>{cat.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <textarea
+              value={bulkText}
+              onChange={(e) => setBulkText(e.target.value)}
+              placeholder={`Água 3.00\nGuaravita 3.00\nRefrigerante 7.00\nBala Halls\nChiclete Trident`}
+              rows="6"
+              className="w-full text-sm border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none font-mono"
+            />
+
+            <button
+              onClick={handleBulkImport}
+              disabled={!bulkText.trim() || !bulkTargetCategory}
+              className="w-full mt-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors flex justify-center items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <Plus className="w-4 h-4" /> Importar Itens
+            </button>
           </section>
 
           {/* Gestão de Categorias e Itens */}
@@ -412,7 +512,7 @@ export default function App() {
           {/* Rodapé decorativo opcional para pré-visualização */}
           <div className="mt-16 pt-8 border-t border-gray-200 text-center print:border-gray-300">
             <p className="text-xs text-gray-400">
-              Obrigado pela preferência! • Taxas de serviço incluídas.
+              Obrigado pela preferência!
             </p>
           </div>
 
